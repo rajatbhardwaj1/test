@@ -1,0 +1,9 @@
+name: qna-server
+description: qna platform for sprinklr employees
+maintainers:
+  - email: rajatbhardwaj.rajat@sprinklr.com
+    name: Rajat Bhardwaj
+version: 0.1.0
+appVersion: "1.0"
+kubeVersion: "^1.8.0-0"
+apiVersion: v2

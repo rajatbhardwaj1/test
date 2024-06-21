@@ -1,0 +1,126 @@
+kind: Deployment
+apiVersion: {{ .Values.api.deployment | default "apps/v1" | quote }}
+metadata:
+  name: qna-server-deployment
+  labels:
+    app: qna-server
+    deploymentName: qna-server-deployment
+    chartName: {{ .Values.chartName }}
+    releaseName: {{ .Values.releaseName }}
+    {{- if .Values.division }}
+    division: {{ .Values.division }}
+    {{- end }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: qna-server
+  template:
+    metadata:
+      labels:
+        app: qna-server
+        {{- if .Values.labels.owner }}
+        owner: {{ .Values.labels.owner }}
+        {{- end }}
+        {{- if .Values.labels.SlackID }}
+        SlackID: {{ .Values.labels.SlackID }}
+        {{- end }}
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: qna-server
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 1
+      serviceAccountName: {{ .Values.sprVault.serviceAccountName }}
+      {{- if .Values.tolerations }}
+      tolerations:
+{{ toYaml .Values.tolerations | indent 8 }}
+      {{- end }}
+      {{- if .Values.nodeSelector }}
+      nodeSelector:
+{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- end }}
+      containers:
+        - name: qna-server-container
+          image: {{ .Values.deployment.image.repo }}/{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag }}
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy | default "Always" }}
+          env:
+            - name: VAULT_URL
+              value: https://{{ .Values.envName }}-vault-int.sprinklr.com
+            - name: VAULT_K8_ROLE_ID
+              value: {{ .Values.sprVault.vaultRole }}
+            - name: VAULT_PATH
+              value: {{ .Values.sprVault.vaultPath }}
+            - name: MICRO_SERVICE_NAME
+              value: qna-server
+            - name: APP_CLUSTER_NAME
+              value: {{ .Values.kubeClusterName }}
+            - name: APP_NAMESPACE
+              value: {{ .Values.namespace }}
+            - name: MICRO_SERVICE_PORT
+              value: "80"
+            - name: USE_SPR_THREAD_POOL_EXECUTOR
+              value: "false"
+            - name: CONCURRENCY_LIMIT_INTERCEPTOR_ENABLED
+              value: "false"
+          resources:
+            limits:
+              memory: {{ .Values.resources.limits.memory }}
+              {{- if .Values.resources.limits.cpu }}
+              cpu: {{ .Values.resources.limits.cpu }}
+              {{- end }}
+            requests:
+              memory: {{ .Values.resources.requests.memory }}
+              {{- if .Values.resources.requests.cpu }}
+              cpu: {{ .Values.resources.requests.cpu }}
+              {{- end }}
+          ports:
+            - containerPort: 5000
+          readinessProbe:
+            httpGet:
+              path: /check ## checks if the app is ready to serve traffic
+              port: 5000
+            initialDelaySeconds: {{ .Values.health.readinessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.health.readinessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.health.readinessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.health.readinessProbe.failureThreshold }}
+          livenessProbe:
+            httpGet:
+              path: /check
+              port: 5000
+            initialDelaySeconds: {{ .Values.health.livenessProbe.initialDelaySeconds }}
+            timeoutSeconds: {{ .Values.health.livenessProbe.timeoutSeconds }}
+            periodSeconds: {{ .Values.health.livenessProbe.periodSeconds }}
+            failureThreshold: {{ .Values.health.livenessProbe.failureThreshold }}
+          lifecycle:
+            preStop:
+              exec:
+                command: [ 
+                  #Introduce a delay to the shutdown sequence to wait for the 
+                  # pod eviction event to propagate. Then, gracefully shutdown 
+                  "sh", "-c", "sleep 15"
+                ]        
+      imagePullSecrets:
+        - name: {{ .Values.deployment.image.repoSecret | default "spr-nexus" }}
+      dnsPolicy: {{ .Values.deployment.dnsPolicy }}
+      hostAliases:
+       - ip: 10.137.45.139
+         hostnames:
+         - prod-gitlab.sprinklr.com
+      volumes:
+        - name: keystore
+          secret:
+            secretName: keystore
+        - name: spr-local-properties
+          configMap:
+            name: qna-server-properties-config
+        - name: spr-properties
+          configMap:
+            name: qna-server-properties-config
+        - name: mnt1-lst-qna-server-heap-dumps
+      

@@ -1,0 +1,33 @@
+kind: Ingress
+apiVersion: {{ .Values.api.ingress | default "networking.k8s.io/v1" | quote }}
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    nginx.ingress.kubernetes.io/backend-protocol: GRPC
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-body-size: 4096m
+    nginx.ingress.kubernetes.io/server-snippet: grpc_read_timeout 3600s; grpc_send_timeout 3600s;
+  name: qna-server-ingress-int
+  labels:
+    app: qna-server
+  namespace: {{ .Values.namespace }}
+spec:
+  ingressClassName: "ingress-nginx-internal"  
+  rules:
+    - host: {{ .Values.envName }}-qna-server-int.grpc.sprinklr.com ## ?
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                name: qna-server-svc
+                port:
+                  number: 5000
+            pathType: ImplementationSpecific
+  tls:
+    - hosts:
+        - {{ .Values.envName }}-qna-server-int.grpc.sprinklr.com ## ?
+      secretName: grpc.sprinklr.com

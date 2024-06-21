@@ -1,0 +1,30 @@
+{{- if eq ( default $.Values.podDisruptionBudgetEnabled "enabled") "enabled" }}
+{{- if ge (int .Values.replicas) 2 }}
+apiVersion: {{ .Values.api.poddisruptionbudget | default "policy/v1" | quote }}
+kind: PodDisruptionBudget
+metadata:
+  {{- if .Values.tier }}
+  name: qna-server-{{ .Values.tier }}-pdb
+  {{- else }}
+  name: qna-server-pdb
+  {{- end }}
+  labels:
+    app: qna-server
+    {{- if .Values.tier }}
+    tier: {{ .Values.tier }}
+    {{- end }}
+  namespace: {{ .Values.namespace }}
+spec:
+  {{- if .Values.disruptionMinAvailable }}
+  minAvailable: {{ .Values.disruptionMinAvailable }}
+  {{- else }}
+  minAvailable: "50%"
+  {{- end }}
+  selector:
+    matchLabels:
+      app: qna-server
+      {{- if .Values.tier }}
+      tier: {{ .Values.tier }}
+      {{- end }}
+{{- end }}
+{{- end }}

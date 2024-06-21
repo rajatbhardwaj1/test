@@ -1,0 +1,16 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: qna-server-svc
+  labels:
+    app: qna-server
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: qna-server
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 5000
+  type: ClusterIP

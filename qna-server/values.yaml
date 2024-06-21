@@ -1,0 +1,38 @@
+### Namespace under which the app will run
+namespace: spr-apps
+
+### Image details
+deployment:
+  image:
+    repo: prod-nexus.sprinklr.com:8123
+    policy: IfNotPresent
+    repoSecret: spr-nexus
+
+sprVault:
+  vaultRole: java
+  serviceAccountName: java-vault
+  vaultPath: "/v1/auth/java/login"
+
+health:
+  readinessProbe:
+    initialDelaySeconds: 50
+    timeoutSeconds: 10
+    periodSeconds: 5
+    failureThreshold: 300
+  livenessProbe:
+    initialDelaySeconds: 60
+    timeoutSeconds: 10
+    periodSeconds: 5
+    failureThreshold: 10
+
+labels:
+  owner: lst-oncall
+  SlackID: SQ41VPPBR
+
+api:
+  deployment: "apps/v1"
+  ingress: "networking.k8s.io/v1"
+  poddisruptionbudget: policy/v1
+
+deploymentName: "qna-server-deployment"
+division: "backend"

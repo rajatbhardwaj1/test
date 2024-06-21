@@ -1,0 +1,27 @@
+kind: Ingress
+apiVersion: {{ .Values.api.ingress | default "networking.k8s.io/v1" | quote }}
+metadata:
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    kubernetes.io/ingress.class: "ingress-nginx-external"
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-body-size: 4096m
+  name: qna-server-ext
+  labels:
+    app: qna-server
+  namespace: {{ .Values.namespace }}
+spec:
+  ingressClassName: "ingress-nginx-external"  
+  rules:
+    - host: devtools-qna.sprinklr.com
+      http:
+        paths:
+          - path: /
+            backend:
+              service:
+                name: qna-server-svc
+                port:
+                  number: 5000
+            pathType: ImplementationSpecific

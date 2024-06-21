@@ -1,0 +1,9 @@
+replicas: 1
+javaOpts: -Xms2g -Xmx2g -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -Djdk.tls.client.protocols=TLSv1.2 -Dmvel2.disable.jit=true -XX:+FlightRecorder -XX:StartFlightRecording=filename=/mnt1/tmp/recording.jfr,disk=true,maxsize=100m
+resources:
+  limits:
+    memory: 3Gi
+  requests:
+    memory: 3Gi
+
+k8sClusterName: "apps-gke"
