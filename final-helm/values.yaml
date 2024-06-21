@@ -5,10 +5,10 @@
 replicaCount: 1
 
 image:
-  repository: asia-south1-docker.pkg.dev/gc-qa6/gc-qa6/qna-server:latest
+  repository: asia-south1-docker.pkg.dev/gc-qa6/gc-qa6/qna-server
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: latest
 
 imagePullSecrets: []
 nameOverride: ""
