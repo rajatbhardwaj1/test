@@ -4,6 +4,8 @@
 
 replicaCount: 1
 
+namespace: lst-apps
+
 image:
   repository: qna-server
   pullPolicy: IfNotPresent
