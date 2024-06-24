@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: office-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    - host: devtools-qna.sprinklr.com   # Replace with your desired hostname
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              service:
+                name: {{ include "sprlink-helm.fullname" . }}
+                 # Name of your Kubernetes Service
+                port:
+                  number: 80  # Port number your service listens on

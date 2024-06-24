@@ -5,7 +5,7 @@
 replicaCount: 1
 
 image:
-  repository: asia-south1-docker.pkg.dev/gc-qa6/gc-qa6/qna-server
+  repository: qna-server
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: latest
@@ -41,12 +41,13 @@ securityContext: {}
 
 
 service:
-  type: ClusterIP
+  type: LoadBalancer
   port: 80
+  targetport: 5000
 
 ingress:
   enabled: true
-  className: ""
+  className: "ingress-nginx-office"
   annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
@@ -67,10 +68,10 @@ resources:
   # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   limits:
     cpu: 100m
-    memory: 128Mi
+    memory: 1Gi
   requests:
     cpu: 100m
-    memory: 128Mi
+    memory: 1Gi
 
 livenessProbe:
   httpGet:
