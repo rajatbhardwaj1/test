@@ -13,7 +13,7 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: {{ include "sprlink-helm.fullname" . }}
+                name: my-server-sprlink-helm
                  # Name of your Kubernetes Service
                 port:
                   number: 80  # Port number your service listens on
