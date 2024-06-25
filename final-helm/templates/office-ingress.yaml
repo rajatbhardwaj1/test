@@ -23,6 +23,6 @@ spec:
             pathType: ImplementationSpecific
             backend:
               service:
-                name: my-server-sprlink-helm
+                name: qna-server-client-sprlink-helm
                 port:
                   number: 80 
